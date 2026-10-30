@@ -841,7 +841,6 @@ Future<PuroGlobalPrefsModel> _updateGlobalPrefs({
 }
 
 final globalPrefsJsonFileProvider = Provider<File>.late();
-final isFirstRunProvider = Provider<bool>.late();
 final globalPrefsProvider = Provider<Future<PuroGlobalPrefsModel>>(
   (scope) => _readGlobalPrefs(scope: scope),
 );

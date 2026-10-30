@@ -333,7 +333,6 @@ class PuroCommandRunner extends CommandRunner<CommandResult> {
       scope.add(globalPrefsJsonFileProvider, prefsJson);
       final firstRun =
           !prefsJson.existsSync() || prefsJson.statSync().size == 0;
-      scope.add(isFirstRunProvider, firstRun);
       log.d('firstRun: $firstRun');
       log.d('legacyPubCache: $legacyPubCache');
 
