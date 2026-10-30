@@ -1,3 +1,22 @@
+## 2.0.1
+
+### Fixes
+
+- Web builds no longer fail with "SDK root directory not found" ([#10](https://github.com/phntmxyz/puro2/pull/10), thx @FMorschel)
+- `puro2 dart pub` finds the Flutter SDK again ([pingbird/puro#147](https://github.com/pingbird/puro/issues/147), [#11](https://github.com/phntmxyz/puro2/pull/11), thx @nielsenko)
+- `puro2 rename` keeps the global default, the package config of your projects and their IDE configs on the renamed environment, and no longer changes the `.puro.json` of the project you are in ([#15](https://github.com/phntmxyz/puro2/pull/15))
+- `puro2 upgrade --force` no longer crashes, and it repairs an environment whose checkout is broken ([#14](https://github.com/phntmxyz/puro2/pull/14))
+- `--root` is no longer ignored, it also applies to `upgrade-puro2` and to the `bin/puro2` script of a standalone executable ([#18](https://github.com/phntmxyz/puro2/pull/18))
+- `prefs.json` stays readable for Puro 1.4.9 and older, an existing file gets fixed on its next update, for example with `puro2 use --global <env>` ([#20](https://github.com/phntmxyz/puro2/pull/20))
+
+### Windows
+
+- Installing into a path with spaces or `[` no longer crashes while unzipping the engine ([#13](https://github.com/phntmxyz/puro2/pull/13))
+- Environment paths over about 63 characters no longer break Flutter checkouts: `puro2 upgrade` failed and `puro2 create` silently left files out ([#16](https://github.com/phntmxyz/puro2/pull/16))
+- `bin\puro2.bat` of a standalone executable returns the exit code of the command instead of always 0, existing scripts get this with `puro2 install-puro2 --force` ([#21](https://github.com/phntmxyz/puro2/pull/21))
+
+[diff 2.0.0...2.0.1](https://github.com/phntmxyz/puro2/compare/2.0.0...2.0.1)
+
 ## 2.0.0
 
 The first release of Puro2, phntm's fork of [Puro](https://github.com/pingbird/puro).
