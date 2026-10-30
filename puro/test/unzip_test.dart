@@ -77,7 +77,7 @@ void main() {
       addTearDown(() => root.deleteSync(recursive: true));
       final zipFile = root.childFile("engine's archive.zip")
         ..writeAsBytesSync(_zipBytes);
-      final destination = root.childDirectory('John Doe')..createSync();
+      final destination = root.childDirectory('John [Doe]')..createSync();
 
       final result = Process.runSync('powershell', [
         '-command',
@@ -99,9 +99,10 @@ void main() {
         zipPath: r'C:\Users\John Doe\.puro\engine.zip',
         destinationPath: 'C:\\Users\\John O\'Doe\u2019s \$dir\\cache',
       ),
-      'Import-Module Microsoft.PowerShell.Archive; Expand-Archive '
-      r"-LiteralPath 'C:\Users\John Doe\.puro\engine.zip' "
-      '-DestinationPath \'C:\\Users\\John O\'\'Doe\u2019\u2019s \$dir\\cache\'',
+      'Add-Type -AssemblyName System.IO.Compression.FileSystem; '
+      '[System.IO.Compression.ZipFile]::ExtractToDirectory('
+      r"'C:\Users\John Doe\.puro\engine.zip', "
+      '\'C:\\Users\\John O\'\'Doe\u2019\u2019s \$dir\\cache\')',
     );
   });
 }

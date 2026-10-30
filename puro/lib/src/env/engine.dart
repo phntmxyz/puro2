@@ -131,9 +131,11 @@ String expandArchiveCommand({
     return "'$escaped'";
   }
 
-  return 'Import-Module Microsoft.PowerShell.Archive; Expand-Archive '
-      '-LiteralPath ${quote(zipPath)} '
-      '-DestinationPath ${quote(destinationPath)}';
+  // Expand-Archive treats an existing destination as a wildcard pattern, which
+  // breaks on `[` in the path. ZipFile takes both paths literally.
+  return 'Add-Type -AssemblyName System.IO.Compression.FileSystem; '
+      '[System.IO.Compression.ZipFile]::ExtractToDirectory('
+      '${quote(zipPath)}, ${quote(destinationPath)})';
 }
 
 /// Unzips [zipFile] into [destination].
