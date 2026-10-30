@@ -126,7 +126,7 @@ Future<void> _installTrampoline({
       : '#!/usr/bin/env bash\n# Puro2 installed at $installLocation';
 
   final trampolineScript = Platform.isWindows
-      ? '$trampolineHeader\n$command %* & exit /B !ERRORLEVEL!'
+      ? '$trampolineHeader\n$command %*\nexit /B'
       : '$trampolineHeader\n$command "\$@"';
 
   final trampolineExists = trampolineFile.existsSync();
