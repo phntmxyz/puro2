@@ -86,6 +86,17 @@ Future<void> _promoteStandalone({required Scope scope}) async {
   currentExecutableFile.moveSync(executableFile.path);
 }
 
+/// The script in `bin\puro2.bat` when the executable lives somewhere else.
+///
+/// `%ERRORLEVEL%` is only expanded right if the exit is on its own line, on the
+/// same line it would hold the value from before [command] ran.
+String windowsTrampolineScript({
+  required String header,
+  required String command,
+}) {
+  return '$header\n$command %*\nexit /B %ERRORLEVEL%';
+}
+
 Future<void> _installTrampoline({
   required Scope scope,
   bool force = false,
@@ -131,8 +142,10 @@ Future<void> _installTrampoline({
   if (Platform.isWindows) {
     // cmd reads this file in the console code page and expands `%`, so the
     // path can't be written out here.
-    trampolineScript =
-        '$trampolineHeader\n$command --root "%~dp0.." %* & exit /B !ERRORLEVEL!';
+    trampolineScript = windowsTrampolineScript(
+      header: trampolineHeader,
+      command: '$command --root "%~dp0.."',
+    );
   } else {
     final root = config.puroRoot.path.replaceAll("'", r"'\''");
     trampolineScript = "$trampolineHeader\n$command --root '$root' \"\$@\"";
