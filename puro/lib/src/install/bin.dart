@@ -136,9 +136,20 @@ Future<void> _installTrampoline({
       ? '@echo off\nREM Puro2 installed at $installLocation'
       : '#!/usr/bin/env bash\n# Puro2 installed at $installLocation';
 
-  final trampolineScript = Platform.isWindows
-      ? windowsTrampolineScript(header: trampolineHeader, command: command)
-      : '$trampolineHeader\n$command "\$@"';
+  // The executable lives outside of this root, so without the flag it would
+  // fall back to the default root.
+  final String trampolineScript;
+  if (Platform.isWindows) {
+    // cmd reads this file in the console code page and expands `%`, so the
+    // path can't be written out here.
+    trampolineScript = windowsTrampolineScript(
+      header: trampolineHeader,
+      command: '$command --root "%~dp0.."',
+    );
+  } else {
+    final root = config.puroRoot.path.replaceAll("'", r"'\''");
+    trampolineScript = "$trampolineHeader\n$command --root '$root' \"\$@\"";
+  }
 
   final trampolineExists = trampolineFile.existsSync();
   final executableExists = executableIsTrampoline
