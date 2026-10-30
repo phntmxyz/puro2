@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -66,6 +67,31 @@ void main() {
 
     expect(destination.childFile('hello.txt').readAsStringSync(), 'hello');
   });
+
+  test(
+    'expandArchiveCommand unzips with PowerShell',
+    () {
+      // unzip prefers 7z when it is installed, like on the CI runners.
+      const fileSystem = LocalFileSystem();
+      final root = fileSystem.systemTempDirectory.createTempSync('puro2 test');
+      addTearDown(() => root.deleteSync(recursive: true));
+      final zipFile = root.childFile("engine's archive.zip")
+        ..writeAsBytesSync(_zipBytes);
+      final destination = root.childDirectory('John Doe')..createSync();
+
+      final result = Process.runSync('powershell', [
+        '-command',
+        expandArchiveCommand(
+          zipPath: zipFile.path,
+          destinationPath: destination.path,
+        ),
+      ]);
+
+      expect(result.exitCode, 0, reason: '${result.stderr}');
+      expect(destination.childFile('hello.txt').readAsStringSync(), 'hello');
+    },
+    skip: Platform.isWindows ? false : 'PowerShell only runs on Windows',
+  );
 
   test('expandArchiveCommand quotes both paths', () {
     expect(
