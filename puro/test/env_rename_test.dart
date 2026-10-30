@@ -43,7 +43,6 @@ Scope _createScope(Directory tempDir, Directory currentProject) {
   scope.add(PuroLogger.provider, PuroLogger());
   scope.add(PuroConfig.provider, config);
   scope.add(globalPrefsJsonFileProvider, config.globalPrefsJsonFile);
-  scope.add(isFirstRunProvider, false);
   scope.add(Terminal.provider, Terminal(stdout: stdout));
   return scope;
 }
