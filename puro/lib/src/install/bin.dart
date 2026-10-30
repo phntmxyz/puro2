@@ -125,9 +125,12 @@ Future<void> _installTrampoline({
       ? '@echo off\nREM Puro2 installed at $installLocation'
       : '#!/usr/bin/env bash\n# Puro2 installed at $installLocation';
 
+  // The executable lives outside of this root, so without the flag it would
+  // fall back to the default root.
+  final root = '--root "${config.puroRoot.path}"';
   final trampolineScript = Platform.isWindows
-      ? '$trampolineHeader\n$command %* & exit /B !ERRORLEVEL!'
-      : '$trampolineHeader\n$command "\$@"';
+      ? '$trampolineHeader\n$command $root %* & exit /B !ERRORLEVEL!'
+      : '$trampolineHeader\n$command $root "\$@"';
 
   final trampolineExists = trampolineFile.existsSync();
   final executableExists = executableIsTrampoline
