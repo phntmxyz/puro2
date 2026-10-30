@@ -327,6 +327,7 @@ class PuroCommandRunner extends CommandRunner<CommandResult> {
         scope: scope,
         fileSystem: fileSystem,
         homeDir: homeDir,
+        rootOverride: rootDirOverride,
       );
       final prefsJson = puroRoot.childFile('prefs.json');
       scope.add(globalPrefsJsonFileProvider, prefsJson);

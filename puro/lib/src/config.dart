@@ -245,7 +245,11 @@ class PuroConfig {
     required Scope scope,
     required FileSystem fileSystem,
     required Directory homeDir,
+    String? rootOverride,
   }) {
+    if (rootOverride != null) {
+      return fileSystem.directory(rootOverride).absolute;
+    }
     final log = PuroLogger.of(scope);
     final envPuroRoot = Platform.environment['PURO_ROOT'];
     log.d('envPuroRoot: $envPuroRoot');
