@@ -2,7 +2,7 @@
 
 ### Fixes
 
-- Web builds no longer fail with "SDK root directory not found" ([#10](https://github.com/phntmxyz/puro2/pull/10))
+- Web builds no longer fail with "SDK root directory not found" ([#10](https://github.com/phntmxyz/puro2/pull/10), thx @FMorschel)
 - `puro2 dart pub` finds the Flutter SDK again ([pingbird/puro#147](https://github.com/pingbird/puro/issues/147), [#11](https://github.com/phntmxyz/puro2/pull/11), thx @nielsenko)
 - `puro2 rename` keeps the global default, the package config of your projects and their IDE configs on the renamed environment, and no longer changes the `.puro.json` of the project you are in ([#15](https://github.com/phntmxyz/puro2/pull/15))
 - `puro2 upgrade --force` no longer crashes, and it repairs an environment whose checkout is broken ([#14](https://github.com/phntmxyz/puro2/pull/14))
