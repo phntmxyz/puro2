@@ -12,7 +12,30 @@ import '../terminal.dart';
 import '../workspace/install.dart';
 import 'default.dart';
 
-/// Deletes an environment.
+/// Points a project's package config at the renamed environment.
+///
+/// It holds absolute uris into the Flutter SDK. The flutter tool sees an up to
+/// date config, doesn't run pub get, and then fails to find the Flutter
+/// packages.
+void _updatePackageConfig({
+  required Directory projectDir,
+  required EnvConfig from,
+  required EnvConfig to,
+}) {
+  final file = projectDir
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
+  if (!file.existsSync()) {
+    return;
+  }
+  final pathContext = file.fileSystem.path;
+  final fromUri = '${pathContext.toUri(from.envDir.path)}/';
+  final toUri = '${pathContext.toUri(to.envDir.path)}/';
+  file.writeAsStringSync(file.readAsStringSync().replaceAll(fromUri, toUri));
+}
+
+/// Renames an environment and updates the projects and the global default that
+/// use it.
 Future<void> renameEnvironment({
   required Scope scope,
   required String name,
@@ -35,11 +58,16 @@ Future<void> renameEnvironment({
   }
 
   final dotfiles = await getDotfilesUsingEnv(scope: scope, environment: env);
+  final isDefault = await getDefaultEnvName(scope: scope) == env.name;
 
   if (env.updateLockFile.existsSync()) {
     await env.updateLockFile.delete();
   }
   await env.envDir.rename(newEnv.envDir.path);
+
+  if (isDefault) {
+    await setDefaultEnvName(scope: scope, envName: newEnv.name);
+  }
 
   final updated = <File>[];
 
@@ -57,6 +85,7 @@ Future<void> renameEnvironment({
           ),
           passive: true,
         );
+        _updatePackageConfig(projectDir: dotfile.parent, from: env, to: newEnv);
         updated.add(dotfile);
       } catch (exception, stackTrace) {
         log.e('Exception while switching environment of ${dotfile.parent}');

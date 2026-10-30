@@ -217,28 +217,6 @@ class GitClient {
     _ensureSuccess(result);
   }
 
-  /// https://git-scm.com/docs/git-reset
-  Future<bool> tryReset({
-    required Directory repository,
-    String? ref,
-    bool soft = false,
-    bool mixed = false,
-    bool hard = false,
-    bool merge = false,
-    bool keep = false,
-  }) async {
-    final result = await raw([
-      'reset',
-      if (soft) '--soft',
-      if (mixed) '--mixed',
-      if (hard) '--hard',
-      if (merge) '--merge',
-      if (keep) '--keep',
-      if (ref != null) ref,
-    ], directory: repository);
-    return result.exitCode == 0;
-  }
-
   /// https://git-scm.com/docs/git-pull
   Future<void> pull({
     required Directory repository,

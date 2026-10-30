@@ -90,8 +90,14 @@ Future<EnvUpgradeResult> upgradeEnvironment({
     throw CommandError("Couldn't find Flutter version, corrupt environment?");
   }
 
-  if (currentCommit != toVersion.commit ||
-      (toVersion.branch != null && branch != toVersion.branch)) {
+  final isOnVersion =
+      currentCommit == toVersion.commit &&
+      (toVersion.branch == null || branch == toVersion.branch);
+  // Checking out again is how a checkout left incomplete by a failed upgrade
+  // gets repaired. Forks can't do this, they only ever fast-forward.
+  final repair = force && !prefs.hasForkRemoteUrl();
+
+  if (!isOnVersion || repair) {
     prefs = await environment.updatePrefs(
       scope: scope,
       fn: (prefs) {
