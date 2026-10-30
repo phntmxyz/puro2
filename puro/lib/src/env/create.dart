@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:clock/clock.dart';
 import 'package:file/file.dart';
@@ -392,6 +393,15 @@ Future<void> cloneFlutterWithSharedRefs({
         .childDirectory('.git')
         .childDirectory('objects');
     alternatesFile.writeAsStringSync('${sharedObjects.path}\n');
+    if (Platform.isWindows) {
+      // The monorepo has paths of almost 200 characters, without this git
+      // fails with `Filename too long` when the env path is over 60 or so.
+      await git.config(
+        repository: repository,
+        name: 'core.longpaths',
+        value: 'true',
+      );
+    }
     await git.syncRemotes(repository: repository, remotes: remotes);
 
     // Delete the cache when we switch versions so the new version doesn't
