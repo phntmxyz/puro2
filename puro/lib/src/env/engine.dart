@@ -113,6 +113,31 @@ enum EngineBuildTarget {
   );
 }
 
+/// The PowerShell command that unzips [zipPath] into [destinationPath].
+///
+/// PowerShell joins everything after `-command` and parses it again, so the
+/// paths have to be quoted in the command itself.
+String expandArchiveCommand({
+  required String zipPath,
+  required String destinationPath,
+}) {
+  // Nothing is expanded in a single-quoted string. PowerShell also accepts
+  // typographic quotes as its delimiters, they are escaped the same way.
+  String quote(String str) {
+    final escaped = str.replaceAllMapped(
+      RegExp("['\u2018\u2019\u201a\u201b]"),
+      (match) => '${match[0]}${match[0]}',
+    );
+    return "'$escaped'";
+  }
+
+  // Expand-Archive treats an existing destination as a wildcard pattern, which
+  // breaks on `[` in the path. ZipFile takes both paths literally.
+  return 'Add-Type -AssemblyName System.IO.Compression.FileSystem; '
+      '[System.IO.Compression.ZipFile]::ExtractToDirectory('
+      '${quote(zipPath)}, ${quote(destinationPath)})';
+}
+
 /// Unzips [zipFile] into [destination].
 Future<void> unzip({
   required Scope scope,
@@ -131,10 +156,11 @@ Future<void> unzip({
       ], throwOnFailure: true);
     } else {
       await runProcess(scope, 'powershell', [
-        'Import-Module Microsoft.PowerShell.Archive; Expand-Archive',
-        zipFile.path,
-        '-DestinationPath',
-        destination.path,
+        '-command',
+        expandArchiveCommand(
+          zipPath: zipFile.path,
+          destinationPath: destination.path,
+        ),
       ], throwOnFailure: true);
     }
   } else if (Platform.isLinux || Platform.isMacOS) {

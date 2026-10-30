@@ -7,9 +7,14 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
+        shell: bash
         working-directory: puro
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +22,11 @@ jobs:
         with:
           sdk: 3.10.0
       - run: dart pub get
-      - run: dart format --set-exit-if-changed .
-      - run: dart analyze --fatal-infos
+      # Git checks out CRLF line endings on Windows, one platform is enough.
+      - if: runner.os == 'Linux'
+        run: dart format --set-exit-if-changed .
+      - if: runner.os == 'Linux'
+        run: dart analyze --fatal-infos
       - run: dart test -r expanded
-      - run: dart compile exe bin/puro2.dart -o bin/puro2
-      - run: bin/puro2 version --no-update-check
+      - run: dart compile exe bin/puro2.dart -o bin/puro2.exe
+      - run: bin/puro2.exe version --no-update-check
