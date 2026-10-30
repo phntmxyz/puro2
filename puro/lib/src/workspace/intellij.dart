@@ -300,11 +300,11 @@ class IntelliJConfig extends IdeConfig {
               .getAttribute('url')!
               .replaceAll(
                 RegExp(r'\$USER_HOME\$', caseSensitive: false),
-                config.homeDir.path,
+                config.homeDir.path.replaceAll('\\', '/'),
               )
               .replaceAll(
                 RegExp(r'\$PROJECT_DIR\$', caseSensitive: false),
-                workspaceDir.path,
+                workspaceDir.path.replaceAll('\\', '/'),
               ),
         ).toFilePath().replaceAll(RegExp(r'^\\\\'), '');
         final dartSdkDir = config.fileSystem
@@ -312,13 +312,13 @@ class IntelliJConfig extends IdeConfig {
             .absolute
             .parent
             .parent;
-        if (dartSdkDir.childDirectory('bin').existsSync()) {
-          intellijConfig.dartSdkDir = dartSdkDir.absolute;
-          if (dartSdkDir.parent.basename == 'cache' &&
-              dartSdkDir.parent.parent.basename == 'bin') {
-            intellijConfig.flutterSdkDir =
-                dartSdkDir.parent.parent.parent.absolute;
-          }
+        // The SDK may be gone, renaming an environment still has to recognize
+        // a config that points at its old location.
+        intellijConfig.dartSdkDir = dartSdkDir.absolute;
+        if (dartSdkDir.parent.basename == 'cache' &&
+            dartSdkDir.parent.parent.basename == 'bin') {
+          intellijConfig.flutterSdkDir =
+              dartSdkDir.parent.parent.parent.absolute;
         }
       }
     }

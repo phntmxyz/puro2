@@ -126,6 +126,40 @@ void main() {
     expect(await getDefaultEnvName(scope: scope), 'other');
   });
 
+  test('points the IntelliJ config at the new environment', () async {
+    final tempDir = _createTempDir();
+    final elsewhere = tempDir.childDirectory('elsewhere')..createSync();
+    final scope = _createScope(tempDir, elsewhere);
+    final project = await _createProject(scope, tempDir, 'app', 'old');
+    final config = PuroConfig.of(scope);
+    final oldDartSdk = config.getEnv('old').flutter.cache.dartSdk;
+    oldDartSdk.internalLibrariesDartFile
+      ..createSync(recursive: true)
+      ..writeAsStringSync(
+        'const Map<String, LibraryInfo> libraries = const {\n'
+        '  "core": const LibraryInfo("core/core.dart"),\n'
+        '};\n',
+      );
+    final sdkFile =
+        project
+            .childDirectory('.idea')
+            .childDirectory('libraries')
+            .childFile('Dart_SDK.xml')
+          ..createSync(recursive: true);
+    sdkFile.writeAsStringSync(
+      '<component name="libraryTable"><library name="Dart SDK"><CLASSES>'
+      '<root url="${oldDartSdk.libDir.uri}core" />'
+      '</CLASSES></library></component>',
+    );
+
+    await renameEnvironment(scope: scope, name: 'old', newName: 'new');
+
+    final newDartSdk = config.getEnv('new').flutter.cache.dartSdk;
+    expect(sdkFile.readAsStringSync(), contains('envs/new/'));
+    expect(sdkFile.readAsStringSync(), isNot(contains('envs/old/')));
+    expect(newDartSdk.internalLibrariesDartFile.existsSync(), isTrue);
+  });
+
   test('points the package config at the new environment', () async {
     final tempDir = _createTempDir();
     final elsewhere = tempDir.childDirectory('elsewhere')..createSync();
