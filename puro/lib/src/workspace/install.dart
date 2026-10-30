@@ -123,7 +123,7 @@ Future<void> installWorkspaceEnvironment({
   );
 }
 
-/// Switches the environment of the current project.
+/// Switches the environment of the project in [projectConfig].
 Future<EnvConfig> switchEnvironment({
   required Scope scope,
   required String? envName,
@@ -134,15 +134,15 @@ Future<EnvConfig> switchEnvironment({
   bool passive = false,
 }) async {
   final config = PuroConfig.of(scope);
-  projectDir ??= config.project.ensureParentProjectDir();
-  final model = config.project.readDotfile();
+  projectDir ??= projectConfig.ensureParentProjectDir();
+  final model = projectConfig.readDotfile();
   final environment = await getProjectEnvOrDefault(
     scope: scope,
     envName: envName,
   );
   final oldEnv = model.env;
   model.env = environment.name;
-  await config.project.writeDotfile(scope, model);
+  await projectConfig.writeDotfile(scope, model);
   await installWorkspaceEnvironment(
     scope: scope,
     projectDir: projectDir,
