@@ -91,9 +91,6 @@ class PuroInstallCommand extends PuroCommand {
         if (runner.shouldInstallOverride != null) {
           prefs.shouldInstall = runner.shouldInstallOverride!;
         }
-        if (runner.legacyPubCache != null) {
-          prefs.legacyPubCache = runner.legacyPubCache!;
-        }
       },
     );
 
