@@ -825,9 +825,9 @@ Future<PuroGlobalPrefsModel> _updateGlobalPrefs({
       model.mergeFromProto3Json(jsonDecode(contents));
     }
     await fn(model);
-    if (!model.hasLegacyPubCache()) {
-      model.legacyPubCache = !scope.read(isFirstRunProvider);
-    }
+    // Nothing reads this field, and Puro before 1.4.10 fails on it, so a prefs
+    // file written here keeps working with an older Puro.
+    model.clearLegacyPubCache();
     final newContents = prettyJsonEncoder.convert(model.toProto3Json());
     if (contents != newContents) {
       handle.writeAllStringSync(newContents);
