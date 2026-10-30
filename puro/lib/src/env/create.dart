@@ -421,10 +421,11 @@ Future<void> cloneFlutterWithSharedRefs({
       await fn();
     } catch (exception, stackTrace) {
       throw CommandError.list([
-        CommandMessage(
-          'To overwrite local changes, try passing --force',
-          type: CompletionType.info,
-        ),
+        if (!force)
+          CommandMessage(
+            'To overwrite local changes, try passing --force',
+            type: CompletionType.info,
+          ),
         CommandMessage('$exception\n$stackTrace'),
       ]);
     } finally {
@@ -492,28 +493,16 @@ Future<void> cloneFlutterWithSharedRefs({
       if (branch == currentBranch) {
         // Reset the current branches commit to the target commit, attempt to
         // merge uncomitted changes.
-        if (force) {
-          if (!await git.tryReset(
+        await guardCheckout(() async {
+          // A forced upgrade ditches uncommitted changes, which also restores
+          // files that a failed upgrade left missing.
+          await git.reset(
             repository: repository,
             ref: flutterVersion.commit,
-            merge: true,
-          )) {
-            // We are forcefully upgrading, ditch uncommitted changes.
-            await git.reset(
-              repository: repository,
-              ref: flutterVersion.commit,
-              hard: true,
-            );
-          }
-        } else {
-          await guardCheckout(() async {
-            await git.reset(
-              repository: repository,
-              ref: flutterVersion.commit,
-              merge: true,
-            );
-          });
-        }
+            hard: force,
+            merge: !force,
+          );
+        });
       } else {
         // Delete the target branch if it exists (unless we are on a fork).
         if (await git.checkBranchExists(
